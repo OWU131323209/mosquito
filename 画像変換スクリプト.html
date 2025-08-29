@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像変換スクリプト</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .file-input {
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .convert-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .convert-btn:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ 画像変換スクリプト</h1>
+        
+        <div class="instructions">
+            <h3>使用方法：</h3>
+            <ol>
+                <li>下の「ファイルを選択」ボタンをクリック</li>
+                <li>変換したい画像ファイル（PNG、JPG等）を選択</li>
+                <li>「Base64に変換」ボタンをクリック</li>
+                <li>生成されたBase64コードをコピー</li>
+                <li>HTMLのimgタグのsrc属性に貼り付け</li>
+            </ol>
+        </div>
+
+        <div class="file-input">
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+
+        <button class="convert-btn" onclick="convertToBase64()">Base64に変換</button>
+        <button class="convert-btn" onclick="convertAllImages()">全画像を変換</button>
+        <button class="convert-btn" onclick="clearResult()">クリア</button>
+
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        function convertToBase64() {
+            const fileInput = document.getElementById('imageInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('ファイルを選択してください');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = `// ${file.name} のBase64コード:\nconst ${file.name.replace('.', '_')} = "${base64}";`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function convertAllImages() {
+            // 既知の画像ファイル名
+            const imageFiles = ['arm.png', 'bug_ka.png', 'ka_dead.png'];
+            let allResults = '';
+            
+            // 実際のファイルが存在しない場合のプレースホルダー
+            allResults += `// 画像ファイルのBase64コード（実際のファイルから変換してください）\n`;
+            allResults += `// 使用方法：画像変換スクリプト.html で各画像を変換\n\n`;
+            
+            imageFiles.forEach(filename => {
+                allResults += `// ${filename}\n`;
+                allResults += `const ${filename.replace('.', '_')} = "data:image/png;base64,【ここにBase64コードを貼り付け】";\n\n`;
+            });
+            
+            allResults += `// HTMLでの使用例：\n`;
+            allResults += `// <img src="${imageFiles[0].replace('.', '_')}" alt="腕">\n`;
+            allResults += `// <img src="${imageFiles[1].replace('.', '_')}" alt="蚊">\n`;
+            allResults += `// <img src="${imageFiles[2].replace('.', '_')}" alt="死んだ蚊">\n`;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = allResults;
+        }
+
+        function clearResult() {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('imageInput').value = '';
+        }
+    </script>
+</body>
+</html>
