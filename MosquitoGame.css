@@ -1,0 +1,269 @@
+.mosquito-game {
+  font-family: 'Arial', sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: white;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.game-header h1 {
+  font-size: 3rem;
+  margin: 0 0 20px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #ff6b6b, #feca57);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.game-info {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.lives, .score, .timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.life {
+  font-size: 1.5rem;
+  margin: 0 5px;
+  transition: all 0.3s ease;
+}
+
+.life.active {
+  animation: pulse 1s infinite;
+}
+
+.life.inactive {
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.game-controls {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.start-btn, .end-btn, .reset-btn {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.start-btn {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.end-btn {
+  background: linear-gradient(45deg, #f44336, #da190b);
+  color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+.end-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.6);
+}
+
+.reset-btn {
+  background: linear-gradient(45deg, #2196F3, #1976D2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+}
+
+.reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+}
+
+.game-over {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 30px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.game-over h2 {
+  color: #ff6b6b;
+  margin-bottom: 15px;
+}
+
+.game-over p {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+.game-area {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
+}
+
+.arm-container {
+  position: absolute;
+  top: 50px;
+  right: 50px;
+  z-index: 10;
+}
+
+.arm {
+  width: 150px;
+  height: auto;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.mosquito {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.mosquito:hover {
+  transform: scale(1.1);
+}
+
+.mosquito.dead {
+  cursor: default;
+  animation: fallDown 2s ease-in forwards;
+}
+
+@keyframes fallDown {
+  0% { transform: rotate(0deg); }
+  100% { 
+    transform: rotate(180deg) translateY(100px);
+    opacity: 0;
+  }
+}
+
+.mosquito-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.game-instructions {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 25px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.game-instructions h3 {
+  margin-top: 0;
+  color: #feca57;
+  font-size: 1.5rem;
+}
+
+.game-instructions ul {
+  list-style: none;
+  padding: 0;
+}
+
+.game-instructions li {
+  padding: 8px 0;
+  position: relative;
+  padding-left: 25px;
+}
+
+.game-instructions li:before {
+  content: "🦟";
+  position: absolute;
+  left: 0;
+  top: 8px;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .mosquito-game {
+    padding: 15px;
+  }
+  
+  .game-header h1 {
+    font-size: 2rem;
+  }
+  
+  .game-info {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .game-area {
+    height: 400px;
+  }
+  
+  .arm {
+    width: 100px;
+  }
+  
+  .mosquito {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .game-area {
+    height: 300px;
+  }
+  
+  .arm {
+    width: 80px;
+  }
+  
+  .mosquito {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .start-btn, .end-btn, .reset-btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+}
