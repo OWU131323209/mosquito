@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蚊ゲーム - 腕を守れ！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-header h1 {
+            font-size: 3rem;
+            margin: 0 0 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .lives, .score, .timer {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .life {
+            font-size: 1.5rem;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .life.active {
+            animation: pulse 1s infinite;
+        }
+
+        .life.inactive {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .game-controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .start-btn, .end-btn, .reset-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 10px;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .end-btn {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .end-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.6);
+        }
+
+        .reset-btn {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+        }
+
+        .game-area {
+            position: relative;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .arm-container {
+            position: absolute;
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+
+        .arm {
+            width: 120px;
+            height: auto;
+            transition: all 0.3s ease;
+        }
+
+        .arm.hurt {
+            animation: shake 0.5s ease-in-out;
+            filter: brightness(1.2) saturate(1.5);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            25% { transform: translateY(-50%) translateX(-5px); }
+            75% { transform: translateY(-50%) translateX(5px); }
+        }
+
+        .pain-indicator {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .mosquito {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+
+        .mosquito:hover {
+            transform: scale(1.1);
+        }
+
+        .mosquito.dead {
+            animation: fallDown 2s ease-in-out forwards;
+        }
+
+        @keyframes fallDown {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(180deg) translateY(100px); opacity: 0; }
+        }
+
+        .mosquito-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .game-instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-instructions h3 {
+            margin-top: 0;
+            color: #feca57;
+        }
+
+        .game-instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .game-instructions li {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #feca57;
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .game-area {
+                height: 300px;
+            }
+            
+            .arm {
+                width: 80px;
+            }
+            
+            .mosquito {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .start-btn, .end-btn, .reset-btn {
+                padding: 12px 24px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>蚊ゲーム</h1>
+            <div class="game-info">
+                <div class="lives">
+                    <span>ライフ: </span>
+                    <span class="life active">❤️</span>
+                    <span class="life active">❤️</span>
+                    <span class="life active">❤️</span>
+                </div>
+                <div class="score">スコア: <span id="score">0</span></div>
+                <div class="timer">時間: <span id="timer">30</span>秒</div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="start-btn" id="startBtn">ゲーム開始</button>
+            <button class="end-btn hidden" id="endBtn">ゲーム終了</button>
+            <div class="game-over hidden" id="gameOver">
+                <h2>ゲームオーバー</h2>
+                <p>最終スコア: <span id="finalScore">0</span></p>
+                <button class="reset-btn" id="resetBtn">もう一度プレイ</button>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="arm-container">
+                <img src="arm.png" alt="腕" class="arm" id="arm" onerror="handleImageError(this, '腕の画像')">
+                <div class="pain-indicator hidden" id="painIndicator">💢 痛い！</div>
+            </div>
+        </div>
+
+        <div class="game-instructions">
+            <h3>遊び方</h3>
+            <ul>
+                <li>蚊にカーソルを合わせて攻撃！</li>
+                <li>腕に到達させないように蚊をやっつけよう</li>
+                <li>ライフが0になったらゲームオーバー</li>
+                <li>30秒でゲーム終了</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        class MosquitoGame {
+            constructor() {
+                this.gameState = 'idle';
+                this.lives = 3;
+                this.score = 0;
+                this.timeLeft = 30;
+                this.mosquitos = [];
+                this.gameInterval = null;
+                this.mosquitoInterval = null;
+                this.imagesLoaded = 0;
+                this.totalImages = 3;
+                
+                this.initializeElements();
+                this.preloadImages();
+                this.bindEvents();
+            }
+
+            initializeElements() {
+                this.startBtn = document.getElementById('startBtn');
+                this.endBtn = document.getElementById('endBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.gameOver = document.getElementById('gameOver');
+                this.gameArea = document.getElementById('gameArea');
+                this.arm = document.getElementById('arm');
+                this.painIndicator = document.getElementById('painIndicator');
+                this.scoreElement = document.getElementById('score');
+                this.timerElement = document.getElementById('timer');
+                this.finalScoreElement = document.getElementById('finalScore');
+                this.lifeElements = document.querySelectorAll('.life');
+            }
+
+            preloadImages() {
+                const imageUrls = ['bug_ka.png', 'ka_dead.png', 'arm.png'];
+                const imagePromises = imageUrls.map(url => {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            this.imagesLoaded++;
+                            resolve();
+                        };
+                        img.onerror = () => {
+                            console.warn(`画像の読み込みに失敗: ${url}`);
+                            reject();
+                        };
+                        img.src = url;
+                    });
+                });
+
+                Promise.allSettled(imagePromises).then(() => {
+                    if (this.imagesLoaded === this.totalImages) {
+                        console.log('すべての画像が正常に読み込まれました');
+                    } else {
+                        console.warn(`${this.totalImages - this.imagesLoaded}個の画像の読み込みに失敗しました`);
+                    }
+                });
+            }
+
+            bindEvents() {
+                this.startBtn.addEventListener('click', () => this.startGame());
+                this.endBtn.addEventListener('click', () => this.endGame());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+            }
+
+            startGame() {
+                this.gameState = 'playing';
+                this.lives = 3;
+                this.score = 0;
+                this.timeLeft = 30;
+                this.mosquitos = [];
+                
+                this.updateUI();
+                this.showElement(this.startBtn, false);
+                this.showElement(this.endBtn, true);
+                this.showElement(this.gameOver, false);
+                
+                // タイマー開始
+                this.gameInterval = setInterval(() => {
+                    this.timeLeft--;
+                    this.timerElement.textContent = this.timeLeft;
+                    
+                    if (this.timeLeft <= 0) {
+                        this.endGame();
+                    }
+                }, 1000);
+
+                // 蚊の生成開始
+                this.mosquitoInterval = setInterval(() => {
+                    this.generateMosquito();
+                }, 1000);
+            }
+
+            endGame() {
+                this.gameState = 'gameOver';
+                this.finalScoreElement.textContent = this.score;
+                
+                if (this.gameInterval) clearInterval(this.gameInterval);
+                if (this.mosquitoInterval) clearInterval(this.mosquitoInterval);
+                
+                this.showElement(this.endBtn, false);
+                this.showElement(this.gameOver, true);
+                
+                // 蚊をすべて削除
+                this.mosquitos.forEach(mosquito => {
+                    if (mosquito.element) {
+                        mosquito.element.remove();
+                    }
+                });
+                this.mosquitos = [];
+            }
+
+            generateMosquito() {
+                if (this.gameState !== 'playing') return;
+                
+                const mosquito = {
+                    id: Date.now() + Math.random(),
+                    x: -100,
+                    y: 50 + Math.random() * (this.gameArea.offsetHeight - 200),
+                    isDead: false,
+                    speed: 5 + Math.random() * 6,
+                    targetX: this.gameArea.offsetWidth + 100
+                };
+                
+                const mosquitoElement = document.createElement('div');
+                mosquitoElement.className = 'mosquito';
+                mosquitoElement.style.left = mosquito.x + 'px';
+                mosquitoElement.style.top = mosquito.y + 'px';
+                
+                const img = document.createElement('img');
+                img.src = 'bug_ka.png';
+                img.alt = '蚊';
+                img.className = 'mosquito-img';
+                img.onerror = () => {
+                    // 画像読み込みエラー時の代替表示
+                    mosquitoElement.innerHTML = '🦟';
+                    mosquitoElement.style.fontSize = '30px';
+                    mosquitoElement.style.textAlign = 'center';
+                    mosquitoElement.style.lineHeight = '50px';
+                };
+                
+                mosquitoElement.appendChild(img);
+                mosquitoElement.addEventListener('mouseenter', () => this.attackMosquito(mosquito.id));
+                
+                this.gameArea.appendChild(mosquitoElement);
+                mosquito.element = mosquitoElement;
+                this.mosquitos.push(mosquito);
+            }
+
+            attackMosquito(mosquitoId) {
+                if (this.gameState !== 'playing') return;
+                
+                const mosquito = this.mosquitos.find(m => m.id === mosquitoId);
+                if (mosquito && !mosquito.isDead) {
+                    mosquito.isDead = true;
+                    mosquito.element.classList.add('dead');
+                    
+                    const img = mosquito.element.querySelector('img');
+                    if (img) {
+                        img.src = 'ka_dead.png';
+                        img.onerror = () => {
+                            // 死んだ蚊の画像読み込みエラー時の代替表示
+                            mosquito.element.innerHTML = '💀';
+                            mosquito.element.style.fontSize = '30px';
+                            mosquito.element.style.textAlign = 'center';
+                            mosquito.element.style.lineHeight = '50px';
+                        };
+                    }
+                    
+                    this.score += 10;
+                    this.scoreElement.textContent = this.score;
+                    
+                    // 2秒後に蚊を削除
+                    setTimeout(() => {
+                        if (mosquito.element) {
+                            mosquito.element.remove();
+                            this.mosquitos = this.mosquitos.filter(m => m.id !== mosquitoId);
+                        }
+                    }, 2000);
+                }
+            }
+
+            resetGame() {
+                this.gameState = 'idle';
+                this.lives = 3;
+                this.score = 0;
+                this.timeLeft = 30;
+                
+                this.updateUI();
+                this.showElement(this.startBtn, true);
+                this.showElement(this.endBtn, false);
+                this.showElement(this.gameOver, false);
+                
+                // 蚊をすべて削除
+                this.mosquitos.forEach(mosquito => {
+                    if (mosquito.element) {
+                        mosquito.element.remove();
+                    }
+                });
+                this.mosquitos = [];
+            }
+
+            updateUI() {
+                this.scoreElement.textContent = this.score;
+                this.timerElement.textContent = this.timeLeft;
+                
+                this.lifeElements.forEach((life, index) => {
+                    if (index < this.lives) {
+                        life.classList.add('active');
+                        life.classList.remove('inactive');
+                    } else {
+                        life.classList.remove('active');
+                        life.classList.add('inactive');
+                    }
+                });
+            }
+
+            showElement(element, show) {
+                if (show) {
+                    element.classList.remove('hidden');
+                } else {
+                    element.classList.add('hidden');
+                }
+            }
+
+            showPainEffect() {
+                this.arm.classList.add('hurt');
+                this.painIndicator.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    this.arm.classList.remove('hurt');
+                }, 500);
+                
+                setTimeout(() => {
+                    this.painIndicator.classList.add('hidden');
+                }, 2000);
+            }
+
+            updateMosquitos() {
+                if (this.gameState !== 'playing') return;
+                
+                this.mosquitos.forEach(mosquito => {
+                    if (mosquito.isDead) {
+                        mosquito.y += 2;
+                    } else {
+                        mosquito.x += mosquito.speed;
+                        
+                        if (mosquito.x >= this.gameArea.offsetWidth - 200) {
+                            this.lives--;
+                            this.updateUI();
+                            this.showPainEffect();
+                            
+                            if (this.lives <= 0) {
+                                this.endGame();
+                                return;
+                            }
+                            
+                            if (mosquito.element) {
+                                mosquito.element.remove();
+                            }
+                            this.mosquitos = this.mosquitos.filter(m => m.id !== mosquito.id);
+                            return;
+                        }
+                    }
+                    
+                    if (mosquito.element) {
+                        mosquito.element.style.left = mosquito.x + 'px';
+                        mosquito.element.style.top = mosquito.y + 'px';
+                    }
+                });
+                
+                this.mosquitos = this.mosquitos.filter(mosquito => {
+                    if (mosquito.x > this.gameArea.offsetWidth + 100) {
+                        if (mosquito.element) {
+                            mosquito.element.remove();
+                        }
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+
+        // 画像エラーハンドリング関数
+        function handleImageError(img, description) {
+            console.warn(`${description}の読み込みに失敗しました:`, img.src);
+            // 代替表示を設定
+            if (description === '腕の画像') {
+                img.style.display = 'none';
+                const fallback = document.createElement('div');
+                fallback.innerHTML = '🦾';
+                fallback.style.fontSize = '80px';
+                fallback.style.textAlign = 'center';
+                fallback.style.lineHeight = '120px';
+                img.parentNode.appendChild(fallback);
+            }
+        }
+
+        // ゲーム開始
+        const game = new MosquitoGame();
+        
+        // ゲームループ
+        setInterval(() => {
+            game.updateMosquitos();
+        }, 50);
+    </script>
+</body>
+</html>
